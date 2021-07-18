@@ -103,6 +103,7 @@ void IRAM_ATTR AiEsp32RotaryEncoder::readButton_ISR()
 	}
 	else
 	{
+		this->previous_butt_state = false; //避免每次都是released状态
 		buttonState = (butt_state ? BUT_DOWN : BUT_UP);
 	}
 

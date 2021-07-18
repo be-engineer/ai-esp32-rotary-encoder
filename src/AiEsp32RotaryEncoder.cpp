@@ -80,6 +80,7 @@ void IRAM_ATTR AiEsp32RotaryEncoder::readEncoder_ISR()
 
 void IRAM_ATTR AiEsp32RotaryEncoder::readButton_ISR()
 {
+	static long downTime;
 	portENTER_CRITICAL_ISR(&(this->buttonMux));
 
 	uint8_t butt_state = !digitalRead(this->encoderButtonPin);
@@ -103,6 +104,20 @@ void IRAM_ATTR AiEsp32RotaryEncoder::readButton_ISR()
 	else
 	{
 		buttonState = (butt_state ? BUT_DOWN : BUT_UP);
+	}
+
+	//2021-07-17,增加计算按键时间的代码
+	//Serial.println(buttonState);
+	if (buttonState == BUT_PUSHED)
+	{
+		downTime = millis();
+		//Serial.printf("down time:%d\n", downTime);
+	}
+
+	if (buttonState == BUT_RELEASED)
+	{
+		pressedTime = millis() - downTime;
+		//Serial.printf("up time:%d\n", upTime);
 	}
 
 	portEXIT_CRITICAL_ISR(&(this->buttonMux));
@@ -154,7 +169,8 @@ void AiEsp32RotaryEncoder::setup(void (*ISR_callback)(void), void (*ISR_button)(
 {
 	attachInterrupt(digitalPinToInterrupt(this->encoderAPin), ISR_callback, CHANGE);
 	attachInterrupt(digitalPinToInterrupt(this->encoderBPin), ISR_callback, CHANGE);
-	attachInterrupt(digitalPinToInterrupt(this->encoderButtonPin), ISR_button, RISING);
+	attachInterrupt(digitalPinToInterrupt(this->encoderButtonPin),
+					ISR_button, CHANGE); //2021-07-17，触发改为change，这样按键按下和释放都会触发中断
 }
 
 void AiEsp32RotaryEncoder::begin()

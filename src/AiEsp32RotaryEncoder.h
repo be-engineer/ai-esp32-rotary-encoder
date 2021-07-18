@@ -54,7 +54,7 @@ private:
 	long lastReadEncoder0Pos;
 	bool previous_butt_state;
 
-	ButtonState buttonState;
+	ButtonState buttonState = BUT_UP;
 
 	int8_t enc_states[16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
 	void (*ISR_callback)();
@@ -81,6 +81,8 @@ public:
 	void setEncoderValue(long newValue);
 	long encoderChanged();
 	ButtonState currentButtonState();
+	//2021-07-17,增加按键时间变量,用于判断长按和短按
+	unsigned long pressedTime;
 	unsigned long getAcceleration() { return this->rotaryAccelerationCoef; }
 	void setAcceleration(unsigned long acceleration) { this->rotaryAccelerationCoef = acceleration; }
 	void disableAcceleration() { setAcceleration(0); }
